@@ -9,13 +9,13 @@ import os
 
 # Sample size to use of the tributary datasets, should be 1 when we're ready to 
 # create the FUD. 
-sample = 0.05    
+sample = 0.05   
 
 def get_memory_usage(df): 
     """
-    Get memory usage for a dataframe
+    Get memory usage for a dataframe in bytes
     """
-    return f"{df.memory_usage(index=True).sum()//1024:,} KB"
+    return df.memory_usage(index=True).sum()
 
 def load_administrative_shapes(gdb):
     """
@@ -549,7 +549,8 @@ def write_fud(fud_df, type='shapefile'):
             os.makedirs(os.path.join(base, type), exist_ok=True)
             shp_file = os.path.join(base, type,'fud.shp')
             
-            one_shape.to_file(shp_file)            
+            one_shape.to_file(shp_file)
+            
             print('Wrote', shp_file, 'et al.')
             success = True
         
@@ -585,7 +586,7 @@ def main():
     print(f"Welcome to the flashpoint Ukraine dataset (FUD) builder!")
     print()
 
-    urban_gdf, hromada_gdf, ukraine_gdf = load_administrative_shapes("ukr_admbnd_sspe_20240416_AB_GDB.gdb")
+    urban_gdf, hromada_gdf, ukraine_gdf = load_administrative_shapes("HDX/ukr_admbnd_sspe_20240416_AB_GDB.gdb")
     print()
 
     firms_gdf = load_firms_data(ukraine_gdf)
@@ -613,7 +614,7 @@ def main():
     write_fud(fud)
 
     print('Writing as geodatabase... (warnings are okay here)')
-    write_fud(fud)
+    write_fud(fud, type='geopackage')
     
     print()
     print(f"Thank you for choosing FUD.")
