@@ -5,7 +5,10 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import shapely
 import datetime
+import os 
 
+# Sample size to use of the tributary datasets, should be 1 when we're ready to 
+# create the FUD. 
 sample = 0.05    
 
 def get_memory_usage(df): 
@@ -529,39 +532,91 @@ def label_detections(firms_gdf, acled_gdf):
 
     return firms_labeled
 
+def write_fud(fud_df, type='shapefile'): 
+    """
+    Write a geodataframe as a shapefile
+    """ 
+    success = False
+    base = 'export' 
+    os.makedirs(base, exist_ok=True)
+    
+    match type: 
+        # shapefiles can't handle multiple geometry types, so we need to drop 
+        # something. Here we chuck the FIRMS pixel as it can be reconstituted 
+        # from the track/scan/point geometry
+        case 'shapefile': 
+            one_shape = fud_df.drop('geometry', axis='columns')
+            os.makedirs(os.path.join(base, type), exist_ok=True)
+            shp_file = os.path.join(base, type,'fud.shp')
+            
+            one_shape.to_file(shp_file)            
+            print('Wrote', shp_file, 'et al.')
+            success = True
+        
+        case 'geopackage':
+            # We ought to evolve to write the FIRMS pixels to a separate layer in the 
+            # geopackage. Curious users might prefer to validate our spatial join on 
+            # the pixel shape. 
+            #
+            # pixels = fud_df['index', 'geometry']
+            #
+            # if we evolve, we'll need to add layer='<layer name>' args to to_file
+            # below
+            
+            one_shape = fud_df.drop('geometry', axis='columns')
+            os.makedirs(os.path.join(base, type), exist_ok=True)
+            gpkg_file = os.path.join(base, type,'fud.gpkg')
+            
+            one_shape.to_file(gpkg_file, driver='GPKG')
+            
+            print('Wrote', gpkg_file)
+            success = True
+
+        case _:
+            pass
+
+    return success
 
 def main(): 
     """ 
     Command-line entrypoint. Script accepts no args, just chugs through 
     the dataset build. 
     """
+    print(f"Welcome to the flashpoint Ukraine dataset (FUD) builder!")
+    print()
+
     urban_gdf, hromada_gdf, ukraine_gdf = load_administrative_shapes("ukr_admbnd_sspe_20240416_AB_GDB.gdb")
+    print()
+
     firms_gdf = load_firms_data(ukraine_gdf)
+    print()
+
     acled_gdf = load_acled_data('ACLED/2020-09-01-2024-09-24-Ukraine.csv')
-
-    usage = get_memory_usage(urban_gdf) + \
-            get_memory_usage(hromada_gdf) + \
-            get_memory_usage(ukraine_gdf) + \
-            get_memory_usage(firms_gdf) + \
-            get_memory_usage(acled_gdf) 
-    
-    print(f"Datasets loaded, total memory usage is {usage}.")
-
     intersect_times(firms_gdf, acled_gdf)
+    print()
+
     clean_administrative_data(urban_gdf, hromada_gdf, acled_gdf)    
+    print()
+
     acled_gdf = contextualize_events(acled_gdf, urban_gdf, hromada_gdf)
+    print()
+
     build_firms_pixels(firms_gdf)
-    fud_gdf = label_detections(firms_gdf, acled_gdf)
+    print()
+
+    fud = label_detections(firms_gdf, acled_gdf)
+    print()
     
     print(f"Flashpoints ukraine dataset created!") 
 
+    print('\nWriting as shapefile... (warnings are okay here)')
+    write_fud(fud)
+
+    print('Writing as geodatabase... (warnings are okay here)')
+    write_fud(fud)
     
-    
-def test_firms_pixel(): 
-    track = 0.7
-    scan = 0.35
-    p = make_firms_ukraine_pixel(scan, track, 0, 0, angle=0)     
-    assert(get_rect_dims(p) == (track, scan))
+    print()
+    print(f"Thank you for choosing FUD.")
 
 if __name__ == '__main__': 
     main()
