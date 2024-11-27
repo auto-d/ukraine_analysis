@@ -44,7 +44,7 @@ An alternative means of arriving at some confidence that observed phenomena are 
 
 ## Exploratory Data Analysis 
 
-The accompanying [exploratory data analysis notebook](./eda.ipynb) and it's companion [tributary dataset EDA notebook](./fud.ipynb) provide insights into the data and suggest options for future work.  
+The accompanying [tributary dataset EDA notebook](./fud.ipynb) provides insights into the data, its prvoenance and includes suggests for future work.  
 
 ## Ethics
 
