@@ -36,20 +36,11 @@ A repeatably methodology for dataset generation is provided in the [FUD build sc
 
 ## Power Analysis 
 
-- ❗️ Review the framing of spatial statistics provided here:  https://pro.arcgis.com/en/pro-app/latest/tool-reference/spatial-statistics/what-is-a-z-score-what-is-a-p-value.htm
-    - Employ the ramdomization null hypothesis to help validate what we're seeing here with the nasa data
-    - Note this might actually belong in our readme
+A conflict event could have occurred, and driven thermal anomalies, but not been reported in the ACLED data. This is the general problem of having inadequate observations to achieve some statistical significance with a study. Because we don't know the actual number of events that we are trying to study, we are not really able to compute statistical power necessary. Are the ACLED events 50% of reported events, 0.05%? Are the thermal anomalies that are theoretically detectable 0.1%, 22% or 0.005% of those reported events? To what degree are the actual detected anomalies a subset of the potentially detectable events? Each of these unknowns conspires to undermine a forward analysis to help frame criteria necessary to refute the null hypothesis. 
 
-- Frame this as a validation of the tributary datasets to gain confidence in their sourcing and conclude (hoepfully) that they are not the product of some random process (e.g. failure in the space platform sensor, etc..)
-    - The move here might be to run the spatial null-hypothesis test for each of the tributary datasets, in a loop, to determine the degree to which their values deviate from a random sample
-    - ACLED
-    - modis: acqua, terra
-    - viirs: whatever it's flying on (three spacecraft?)
-- statistical power is a measure of how likely we are to be able to accept the alternative hypothesis in the face of random variations
-    - this drives the sample size of our study. here we are only looking at the ukraine to try and infer the relationship between thermal anomalies and conflict events -- how does this pertain to the type of analysis statistic power is usually applied to?
-        - ❗️well, if we are subsampling in our dataset, we could say something like "we have 1000000 events, but studying these at the macro level is cost prohibitive, the minimal number of events we need to infer a relationship between these two things (thermal anomalies and conflict) is 1000 based on the <insert basis rationale>. consequently we're going to conduct our analysis with a randomly sampled 1000 events.
-            - ❗️hmm... but the ACLED and NASA data is itself a subset of the actual events that occurred, so subsetting this subset would result in our math being wrong. even presuning there are doulbe or tenfold increase in actual events could be an underrepresentation!
-    - but what if our sample size is equal to the number of things we're studying? as pointed about above, we're not dealing with statistics anymore we're dealing with a collection of facts. in this case, we might be more interested in validating the observations are distinct from random fluctuations
+**Randomization Null Hypothesis** 
+
+An alternative means of arriving at some confidence that observed phenomena are not random fluctuations is to actuall model what random fluctuations would look like in the context of the study you are attempting. With a suitable appreciation of what randomness looks like, we can look at the level of clustering and dispersion to compare with the population in question. 
 
 ## Exploratory Data Analysis 
 

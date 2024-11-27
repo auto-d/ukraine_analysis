@@ -103,18 +103,7 @@ Humanitarian Data Exchange (HDX) data are prefixed with `h_`.
 - `h_adm_ua`: administrative place name, in Ukrainian
 - `h_adm_shape`: polygon(s) associated with the named administrative boundary
 
-Of course we have no ground-truth here. It's not knowable whether any of the thermal anomalies are definitively tied to a strike or ongoing battle. But, maybe it doesn't matter. If we can find a way to predict the presence of conflict based on the thermal anomaly characteristics, then there is by definition a useful correlation there. As the goal is ultimately to predict conflict from thermal measurements (and not the other way around), it seems perhaps the points we are labeling here are the thermal anomalies, with the label being 0 or more geospatially/temporally coincident events.
-
-Things that are wrong with this:
-An event could have occurred, and driven thermal anomalies, but not been reported in the ACLED data. This is the general problem of having inadequate observations to achieve some statistical significance with a study. Because we don't know the actual number of events that we are trying to study, we are not really able to compute statistical power necessary. Are the ACLED events 50% of reported events, 0.05%? Are the thermal anomalies that are theoretically detectable 0.1%, 22% or 0.005% of those reported events? To what degree are the actual detected anomalies a subset of the potentially detectable events?
-A thermal anomaly motivated by conflict could have occurred, with no ACLED reporting to match
-Seasonal or non-conflict fires will be reprsented in this data, but because we cannot disambiguate from those induced by conflict events without event data, we cannot apply a label
-The event could have occurred as advertised in the ACLED data, but no thermal data - this is safely ignored since we're trying to predict activity by thermal anomalies
-The event could have occurred, and generated a thermal anomaly but not been collected due to overflight timing or weather, or because the fire was too small to be detected, or because there was no fire at all ! - also probably safe to ignore this, we're constraining the dataset and the analysis to detections
-BUT what do we do with ACLED events that have no thermal information? it's not a false negative per se, at least because of the overflight and the sensor sensitivity problems. i think we have to discard these. This would leave us with only true positives to train a model on. "there's an anomaly and look, there's a conflict event associated!" -- ridiculous, the model would just learn to return True every time
-We have to have true negatives, our only option here due to the confounded of weather is to incorporate all thermal anomalies before the war started and assert that effectively zero of those were the result of conflict events --
-test/train split would have to straddle this temporal boundary, which could have all sorts of other issues associated -- hot year/dry year vs cold/rainy -- it's the best we've got
-For all of the above reasons, we crutch on thermal anomalies that occurred prior to the most recent stage of this conflict when Russia invaded Ukraine. While we introduce more confounders like annual fluctuations in temperature or fire
+See also a list of Ukrainian [Hromadas](https://en.wikipedia.org/wiki/List_of_hromadas_of_Ukraine).
 
 ### Is there a label or target associated with each instance?
 
@@ -357,26 +346,29 @@ Humanitarian Data Exchange
 
 Spatial join and event attribution strategy: 
 - We attribute reported conflict events to the smallest administrative division (city-level or failing that, Ukraianian Hromada) associated, as attested to in the ACLED documentation: 
-> Locations are recorded to named populated places, geostrategic locations, natural locations, or neighborhoods of larger cities. Geo-coordinates with four decimals are provided to assist in identifying and mapping named locations to a central point (i.e. a centroid coordinate) within that location. Geo-coordinates do not reflect a more precise location, like a block or street corner, within the named location.
+  > Locations are recorded to named populated places, geostrategic locations, natural locations, or neighborhoods of larger cities. Geo-coordinates with four decimals are provided to assist in identifying and mapping named locations to a central point (i.e. a centroid coordinate) within that location. Geo-coordinates do not reflect a more precise location, like a block or street corner, within the named location.
 - So theremal anomalies occurring within the confines of the Avdiivka hromada, where conflict events concurrently took place, are joined and labeled.
 
-
-
-To do: 
-- retain the PCODE to simplify correlation to HDX data
-- note hormadas somewhere - see https://en.wikipedia.org/wiki/List_of_hromadas_of_Ukraine
 ### Is the software used to preprocess/clean/label the instances available?
 
-
-On interpretation of ACLED events, and our subsetting to arrive at the events with some plausible chance to induce a thermal anomaly. 
-- The Battles and Explosions/Remote violence are the most relevant event types, but the disruption of attacks (notably by shooting down UAVs/drones and other ordance is retained based on its obvious potential to mirror conflict activity and induce thermal anomalies
-- See https://acleddata.com/2019/03/14/acled-introduces-new-event-types-and-sub-event-types/ for more information on 'disrupted weapons use', e
-- 
-_If so, please provide a link or other access point._
-
-Yes. See xyz.ipynb. 
+Yes. See [here](./build.py) and the more elaborate but perpelexing [research notebook](./fud.ipynb).
 
 ### Any other comments?
+
+On interpretation of ACLED events, and our subsetting to arrive at the events with some plausible chance to induce a thermal anomaly: 
+- The Battles and Explosions/Remote violence are the most relevant event types, but the disruption of attacks (notably by shooting down UAVs/drones and other ordance is retained based on its obvious potential to mirror conflict activity and induce thermal anomalies
+- See [ACLED event types article](https://acleddata.com/2019/03/14/acled-introduces-new-event-types-and-sub-event-types/) for more information on 'disrupted weapons use' which seems quite relevant (e.g. UAV intercept).
+
+On the topic of suitably quantifying the underlying phenomena, and the limitations of our aperture into real events: 
+- A thermal anomaly motivated by conflict could have occurred, with no ACLED reporting to match
+- Seasonal or non-conflict fires will be represented in this data, but because we cannot disambiguate from those induced by conflict events without event data, we cannot apply a label
+- The event could have occurred as advertised in the ACLED data, but no thermal data.
+- The event could have occurred, and generated a thermal anomaly but not been collected due to overflight timing or weather, or because the fire was too small to be detected, or because there was no fire at all! 
+
+On the topic of labeling: 
+- ACLED events with no thermal correlation are a sort of negative class, but it's not a false negative per se, at least because of the overflight and the sensor sensitivity problems. 
+- We have to have true negatives, our only option here due to the confounded of weather is to incorporate all thermal anomalies before the escalation in 2022 and assert that effectively zero of those thermal anomalies were the result of conflict events. 
+- For all of the above reasons, we crutch on thermal anomalies that occurred prior to the most recent stage of this conflict when Russia invaded Ukraine. While we introduce more confounders like annual fluctuations in temperature or fire, it seems the best of the options in front of us. 
 
 ## Uses
 
@@ -430,42 +422,42 @@ Humanitarian Data Exchange data is open and shareable under the Creative Commons
 
 ### Do any export controls or other regulatory restrictions apply to the dataset or to individual instances?
 
-_If so, please describe these restrictions, and provide a link or other access point to, or otherwise
-reproduce, any supporting documentation._
+As the research is made freely available and qualifies as fundamental research, it is exempted from the International Trade in Arms Regulation (ITAR) and US Department of Commerce export rules. 
 
 ### Any other comments?
 
 ## Maintenance
 
-_These questions are intended to encourage dataset creators to plan for dataset maintenance
-and communicate this plan with dataset consumers._
-
 ### Who is supporting/hosting/maintaining the dataset?
+
+The author. Maybe. 
 
 ### How can the owner/curator/manager of the dataset be contacted (e.g., email address)?
 
+jason.mooberry@duke.edu
+
 ### Is there an erratum?
 
-_If so, please provide a link or other access point._
+Not at the time of this initial releease. 
 
 ### Will the dataset be updated (e.g., to correct labeling errors, add new instances, delete instances)?
 
-_If so, please describe how often, by whom, and how updates will be communicated to users (e.g., mailing list, GitHub)?_
+Demand dependent. 
 
 ### If the dataset relates to people, are there applicable limits on the retention of the data associated with the instances (e.g., were individuals in question told that their data would be retained for a fixed period of time and then deleted)?
 
-_If so, please describe these limits and explain how they will be enforced._
+NA/
 
 ### Will older versions of the dataset continue to be supported/hosted/maintained?
 
-_If so, please describe how. If not, please describe how its obsolescence will be communicated to users._
+No. 
 
 ### If others want to extend/augment/build on/contribute to the dataset, is there a mechanism for them to do so?
 
-_If so, please provide a description. Will these contributions be validated/verified? If so,
-please describe how. If not, why not? Is there a process for communicating/distributing these
-contributions to other users? If so, please provide a description._
+Yes. The most obvious and welcome path is collaboration via the Github project (which you might be reading this datasheet on): https://github.com/auto-d/ukraine_analysis
 
 ### Any other comments?
+
+None. 
 
 
